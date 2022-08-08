@@ -59,9 +59,9 @@ class App {
             75,
             width / height,
             0.1,
-            100
+            1500
         );
-        camera.position.z = 2;
+        camera.position.set(1000, 0, 0);
         // 다른 메서드에서 참조할 수 있도록 필드에 정의한다.
         this._camera = camera;
     }
@@ -84,19 +84,16 @@ class App {
     }
 
     _setupModel() {
-        // 정육면체 Geometry 객체 생성
-        // width, height, depth 인자를 모두 1로 설정하여 생성한다.
-        const geometry = new Three.BoxGeometry(1, 1, 1);
-        // 파란색 material 생성
-        const material = new Three.MeshPhongMaterial({ color: 0x44a88 });
+        // 나무 기둥에 해당하는 cylinder 장면에 추가
+        const partWidth = 50;
+        const partHeight = 200;
+        const geometry = new Three.CylinderGeometry(partWidth * 0.65, partWidth, partHeight, 32);
 
-        // Geometry와 Material를 이용하여 Mesh가 생성된다.
-        const cube = new Three.Mesh(geometry, material);
+        const color = new Three.Color("#a04500");
+        const material = new Three.MeshPhongMaterial({ color: color });
 
-        // 생성한 Mesh를 Scene 객체에 구가
-        this._scene.add(cube);
-        // 다른 메서드에서 참조할 수 있도록 필드에 정의한다.
-        this._cube = cube;
+        const mesh = new Three.Mesh(geometry, material);
+        this._scene.add(mesh);
     }
 
     _setupControls() {
