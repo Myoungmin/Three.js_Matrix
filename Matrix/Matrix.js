@@ -93,6 +93,10 @@ class App {
         const material = new Three.MeshPhongMaterial({ color: color });
 
         const mesh = new Three.Mesh(geometry, material);
+        // mesh를 y축방향으로 -partHeight / 2 만큼 이동하는 행렬 적용
+        mesh.matrix.makeTranslation(0, -partHeight / 2, 0);
+        // 행렬을 직접 조작할 경우에는, 렌더링될 때마다 행렬이 재계산되지 않도록 설정이 필요하다.
+        mesh.matrixAutoUpdate = false;
         this._scene.add(mesh);
     }
 
