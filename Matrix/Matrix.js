@@ -98,6 +98,71 @@ class App {
         // 행렬을 직접 조작할 경우에는, 렌더링될 때마다 행렬이 재계산되지 않도록 설정이 필요하다.
         mesh.matrixAutoUpdate = false;
         this._scene.add(mesh);
+
+        // 가지를 생성하는 재귀함수 정의
+        // 세 번째 인자 matrix : 가지가 놓일 기준이 되는 mesh에 대한 행렬
+        // 재귀적으로 호출되면 생성한 가지 mesh의 행렬이 기준 행렬이 되어 뻗어나가게 된다.
+        function tree(scene, level, matrix, color) {
+            if (level === 0) return;
+            const tempMatrix = new Three.Matrix4();
+
+            // 가지1 생성 시작
+            const newColor1 = color.clone();
+            // green값을 증가시켜 점점 더 진한 초록색으로 만든다.
+            newColor1.g += 0.7 / levels;
+            const material1 = new Three.MeshPhongMaterial({ color: newColor1 });
+            const mesh1 = new Three.Mesh(geometry, material1);
+
+            // 단위행렬에서 변환 시작
+            const newMatrix1 = new Three.Matrix4();
+            newMatrix1
+                // Y축으로 90도만큼 회전
+                .multiply(tempMatrix.makeRotationY(Math.PI / 2))
+                // X축으로 가지 너비의 절반만큼 이동
+                .multiply(tempMatrix.makeTranslation(partWidth / 2, 0, 0))
+                // Z축으로 -45도만큼 회전
+                .multiply(tempMatrix.makeRotationZ(-Math.PI / 4))
+                // 0.75배 배수 적용
+                .multiply(tempMatrix.makeScale(0.75, 0.75, 0.75))
+                // Y축으로 가지 길이만큼 이동
+                .multiply(tempMatrix.makeTranslation(0, partHeight, 0));
+
+            // mesh의 변환 행렬에 복사 
+            mesh1.matrix.copy(newMatrix1.multiply(matrix));
+            // 복사된 행렬값을 그대로 사용하도록 matrixAutoUpdate를 false로 설정
+            mesh1.matrixAutoUpdate = false;
+            scene.add(mesh1);
+
+            // 레벨을 1 줄이고 재귀 호출, 생성한 가지가 인자로 들어간다.
+            tree(scene, level - 1, newMatrix1, newColor1);
+
+            // 가지2 생성 시작
+            const newColor2 = color.clone();
+            // green값을 증가시켜 점점 더 진한 초록색으로 만든다.
+            newColor2.g += 0.64 / levels;
+            const material2 = new Three.MeshPhongMaterial({ color: newColor2 });
+            const mesh2 = new Three.Mesh(geometry, material2);
+
+            const newMatrix2 = new Three.Matrix4();
+            newMatrix2
+                .multiply(tempMatrix.makeRotationY(Math.PI / 2))
+                // X축 이동과 Z축 회전만 가지1과 대칭된다./////
+                .multiply(tempMatrix.makeTranslation(-partWidth / 2, 0, 0))
+                .multiply(tempMatrix.makeRotationZ(Math.PI / 4))
+                //////////////////////////////////////////////
+                .multiply(tempMatrix.makeScale(0.75, 0.75, 0.75))
+                .multiply(tempMatrix.makeTranslation(0, partHeight, 0));
+
+            mesh2.matrix.copy(newMatrix2.multiply(matrix));
+            mesh2.matrixAutoUpdate = false;
+            scene.add(mesh2);
+
+            tree(scene, level - 1, newMatrix2, newColor2);
+        }
+
+        const levels = 12;
+        // 가지를 생성하는 재귀함수 12레벨로 호출
+        tree(this._scene, levels, mesh.matrix, color);
     }
 
     _setupControls() {
